@@ -18,5 +18,16 @@ pub struct Listing {
     pub maker: Pubkey,
     pub asset: Pubkey,
     pub price: u64,
+    pub solded: bool,
+    pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct Offer {
+    pub listing: Pubkey,
+    pub offer_maker: Pubkey,
+    pub price: u64,
+    pub accepted: bool,
     pub bump: u8,
 }

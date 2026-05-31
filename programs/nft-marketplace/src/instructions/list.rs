@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use mpl_core::{instructions::TransferV1CpiBuilder, ID as MPL_CORE_ID};
 
-use crate::state::Listing};
+use crate::state::Listing;
 
 #[derive(Accounts)]
 pub struct List<'info> {
@@ -38,6 +38,7 @@ impl<'info> List<'info> {
             maker: self.maker.key(),
             asset: self.asset.key(),
             price,
+            solded: false,
             bump: bumps.listing
         });
 

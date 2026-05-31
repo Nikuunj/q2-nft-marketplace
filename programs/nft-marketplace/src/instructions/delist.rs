@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
-use mpl_core::instructions::TransferV1CpiBuilder;
+use mpl_core::{instructions::TransferV1CpiBuilder, ID as MPL_CORE_ID};
 
 use crate::{Listing, MarketPlace};
 
+#[derive(Accounts)]
 pub struct Delist<'info> {
-    #[accept(mut)]
+    #[account(mut)]
     pub maker: Signer<'info>,
     /// CHECK: Is this asset account validate during cpi transfer by mpl-core
     #[account(mut)]

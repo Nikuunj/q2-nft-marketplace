@@ -5,6 +5,7 @@ use anchor_lang::{
 
 use crate::{error::ErrorCode, state::MarketPlace};
 
+#[derive(Accounts)]
 pub struct WithdrawFee<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
@@ -13,7 +14,6 @@ pub struct WithdrawFee<'info> {
         mut,
         has_one = admin,
         seeds = [b"maketplace", maketplace.name.as_bytes()],
-        space = MarketPlace::INIT_SPACE + MarketPlace::DISCRIMINATOR.len(),
         bump = maketplace.bump
     )]
     pub maketplace: Account<'info, MarketPlace>,
@@ -34,7 +34,7 @@ impl<'info> WithdrawFee<'info> {
             self.maketplace.key().as_ref(),
             &[self.maketplace.treasury_bump],
         ];
-        let signer_seeds = &[seeds];
+        let signer_seeds: &[&[&[u8]]] = &[seeds];
 
         transfer(
             CpiContext::new_with_signer(

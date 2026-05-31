@@ -42,6 +42,7 @@ pub struct Buy<'info> {
     )]
     pub listing: Account<'info, Listing>,
     #[account(
+        mut,
         seeds = [b"treasury", maketplace.key().as_ref()],
         bump = maketplace.treasury_bump
     )]
@@ -74,6 +75,7 @@ pub struct Buy<'info> {
 
 impl<'info> Buy<'info> {
     pub fn send_sol(&mut self) -> Result<()> {
+    
         let price = self.listing.price;
         let fee = (price as u128)
             .checked_mul(self.maketplace.fee as u128)
