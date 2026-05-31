@@ -6,4 +6,6 @@ pub enum ErrorCode {
     InvalidName,
     #[msg("Fees is too much")]
     InvalidFee,
+    #[msg("Amount is greter then treasury fund")]
+    AmountTooMuch,
 }
