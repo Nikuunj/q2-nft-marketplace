@@ -8,10 +8,7 @@ use anchor_spl::{
 };
 use mpl_core::{instructions::TransferV1CpiBuilder, ID as MPL_CORE_ID};
 
-use crate::{
-    list,
-    state::{Listing, MarketPlace},
-};
+use crate::state::{Listing, MarketPlace};
 
 #[derive(Accounts)]
 pub struct Buy<'info> {
