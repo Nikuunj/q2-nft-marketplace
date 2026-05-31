@@ -8,16 +8,31 @@ use anchor_spl::{
 };
 use mpl_core::{instructions::TransferV1CpiBuilder, ID as MPL_CORE_ID};
 
-use crate::{state::{Listing, MarketPlace}, error::ErrorCode};
+use crate::{
+    error::ErrorCode,
+    state::{Listing, MarketPlace, Offer},
+};
 
 #[derive(Accounts)]
-pub struct Buy<'info> {
+pub struct TakeOfferFund<'info> {
     #[account(mut)]
-    pub taker: Signer<'info>,
+    pub offer_maker: Signer<'info>,
 
     /// CHECK:
     #[account(mut)]
     pub maker: UncheckedAccount<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"offer", offer.listing.as_ref(), offer.offer_maker.as_ref()],
+        constraint = !listing.solded @ ErrorCode::AlreadySold,
+        bump = offer.bump,
+        has_one = offer_maker,
+        has_one = listing,
+        constraint = offer.accepted @ ErrorCode::OfferNotAccepted
+    )]
+    pub offer: Account<'info, Offer>,
+
     /// CHECK: Is this asset account validate during cpi transfer by mpl-core
     #[account(mut)]
     pub asset: UncheckedAccount<'info>,
@@ -34,20 +49,21 @@ pub struct Buy<'info> {
 
     #[account(
         mut,
-        close = maker,
         seeds = [b"listing", listing.asset.as_ref()],
         bump = listing.bump,
         has_one = maker,
         has_one = asset,
-        constraint = !listing.solded @ ErrorCode::AlreadySold
+        constraint = listing.solded @ ErrorCode::OfferNotAccepted
     )]
     pub listing: Account<'info, Listing>,
+
     #[account(
         mut,
         seeds = [b"treasury", maketplace.key().as_ref()],
         bump = maketplace.treasury_bump
     )]
     pub treasury: SystemAccount<'info>,
+
     #[account(
         seeds = [b"reward_mint", maketplace.key().as_ref()],
         bump = maketplace.treasury_bump,
@@ -58,9 +74,9 @@ pub struct Buy<'info> {
 
     #[account(
         init_if_needed,
-        payer = taker,
+        payer = offer_maker,
         associated_token::mint = reward_mint,
-        associated_token::authority = taker,
+        associated_token::authority = offer_maker,
         associated_token::token_program = token_program
     )]
     pub take_reward_ata: InterfaceAccount<'info, TokenAccount>,
@@ -71,13 +87,13 @@ pub struct Buy<'info> {
 
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Interface<'info, TokenInterface>,
+
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> Buy<'info> {
+impl<'info> TakeOfferFund<'info> {
     pub fn send_sol(&mut self) -> Result<()> {
-    
-        let price = self.listing.price;
+        let price = self.offer.price;
         let fee = (price as u128)
             .checked_mul(self.maketplace.fee as u128)
             .unwrap()
@@ -90,7 +106,7 @@ impl<'info> Buy<'info> {
             CpiContext::new(
                 self.system_program.to_account_info(),
                 Transfer {
-                    from: self.taker.to_account_info(),
+                    from: self.offer_maker.to_account_info(),
                     to: self.maker.to_account_info(),
                 },
             ),
@@ -100,7 +116,7 @@ impl<'info> Buy<'info> {
             CpiContext::new(
                 self.system_program.to_account_info(),
                 Transfer {
-                    from: self.taker.to_account_info(),
+                    from: self.offer_maker.to_account_info(),
                     to: self.treasury.to_account_info(),
                 },
             ),
@@ -121,9 +137,9 @@ impl<'info> Buy<'info> {
         TransferV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
             .asset(&self.asset.to_account_info())
             .collection(self.collection.as_ref().map(|c| c.as_ref()))
-            .payer(&self.taker.to_account_info())
+            .payer(&&self.offer_maker.to_account_info())
             .authority(Some(&self.listing.to_account_info()))
-            .new_owner(&self.taker.to_account_info())
+            .new_owner(&&self.offer_maker.to_account_info())
             .system_program(Some(&self.system_program.to_account_info()))
             .invoke_signed(signers_seeds)?;
 

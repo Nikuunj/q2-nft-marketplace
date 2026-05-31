@@ -12,15 +12,15 @@ pub struct MarketPlace {
     pub name: String,
 }
 
-    #[account]
-    #[derive(InitSpace)]
-    pub struct Listing {
-        pub maker: Pubkey,
-        pub asset: Pubkey,
-        pub price: u64,
-        pub solded: bool,
-        pub bump: u8,
-    }
+#[account]
+#[derive(InitSpace)]
+pub struct Listing {
+    pub maker: Pubkey,
+    pub asset: Pubkey,
+    pub price: u64,
+    pub solded: bool,
+    pub bump: u8,
+}
 
 #[account]
 #[derive(InitSpace)]

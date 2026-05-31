@@ -9,5 +9,7 @@ pub enum ErrorCode {
     #[msg("Amount is greter then treasury fund")]
     AmountTooMuch,
     #[msg("Nft already solded")]
-    AlreadySold
+    AlreadySold,
+    #[msg("Offer not accepted")]
+    OfferNotAccepted,
 }

@@ -1,18 +1,19 @@
 use anchor_lang::prelude::*;
 
-use crate::{state::{Listing, Offer}, error::ErrorCode};
+use crate::state::{Listing, Offer};
 
 #[derive(Accounts)]
-pub struct AcceptOffer<'info> {
+pub struct CloseOffer<'info> {
     #[account(mut)]
-    pub maker: Signer<'info>,
+    pub offer_maker: Signer<'info>,
     /// CHECK:
-    pub offer_maker: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub maker: UncheckedAccount<'info>,
 
     #[account(
         mut,
+        close = offer_maker,
         seeds = [b"offer", offer.listing.as_ref(), offer.offer_maker.as_ref()],
-        constraint = !listing.solded @ ErrorCode::AlreadySold,
         bump = offer.bump,
         has_one = offer_maker,
         has_one = listing
@@ -30,15 +31,9 @@ pub struct AcceptOffer<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> AcceptOffer<'info> {
-    pub fn accept_offer(&mut self) -> Result<()> {
-        self.offer.accepted = true;
-        self.listing.solded = true;
-        Ok(())
-    }
 
-    pub fn reject_offer(&mut self) -> Result<()> {
-        self.offer.accepted = false;
+impl<'info> CloseOffer<'info> {
+    pub fn close_offer(&mut self) -> Result<()> {
         self.listing.solded = false;
         Ok(())
     }
