@@ -8,4 +8,6 @@ pub enum ErrorCode {
     InvalidFee,
     #[msg("Amount is greter then treasury fund")]
     AmountTooMuch,
+    #[msg("Nft already solded")]
+    AlreadySold
 }

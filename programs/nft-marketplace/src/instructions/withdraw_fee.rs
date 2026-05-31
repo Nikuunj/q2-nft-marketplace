@@ -29,9 +29,10 @@ pub struct WithdrawFee<'info> {
 impl<'info> WithdrawFee<'info> {
     pub fn withdraw_fee(&mut self, amount: u64) -> Result<()> {
         require!(amount <= self.treasury.lamports(), ErrorCode::AmountTooMuch);
+        let marketplace_key = self.maketplace.key();
         let seeds = &[
             b"treasury",
-            self.maketplace.key().as_ref(),
+            marketplace_key.as_ref(),
             &[self.maketplace.treasury_bump],
         ];
         let signer_seeds: &[&[&[u8]]] = &[seeds];

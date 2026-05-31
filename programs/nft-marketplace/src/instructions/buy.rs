@@ -8,7 +8,7 @@ use anchor_spl::{
 };
 use mpl_core::{instructions::TransferV1CpiBuilder, ID as MPL_CORE_ID};
 
-use crate::state::{Listing, MarketPlace};
+use crate::{state::{Listing, MarketPlace}, error::ErrorCode};
 
 #[derive(Accounts)]
 pub struct Buy<'info> {
@@ -38,7 +38,8 @@ pub struct Buy<'info> {
         seeds = [b"listing", listing.asset.as_ref()],
         bump = listing.bump,
         has_one = maker,
-        has_one = asset
+        has_one = asset,
+        constraint = !listing.solded @ ErrorCode::AlreadySold
     )]
     pub listing: Account<'info, Listing>,
     #[account(
@@ -143,7 +144,7 @@ impl<'info> Buy<'info> {
                 self.token_program.to_account_info(),
                 MintToChecked {
                     to: self.taker.to_account_info(),
-                    mint: self.receive_rewards(),
+                    mint: self.reward_mint.to_account_info(),
                     authority: self.maketplace.to_account_info(),
                 },
                 signer_seeds,
