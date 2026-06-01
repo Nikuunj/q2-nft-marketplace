@@ -20,7 +20,7 @@ pub struct RejectOffer<'info> {
         seeds = [b"offer", offer.listing.as_ref(), offer.offer_maker.as_ref()],
         bump = offer.bump,
         has_one = offer_maker,
-        has_one = listing,
+        has_one = listing,  
     )]
     pub offer: Account<'info, Offer>,
 

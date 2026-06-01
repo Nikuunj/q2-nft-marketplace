@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-nft_marketplace = "BY1bqJ3LAi54jWk6xo5WF5Nxc6tXf75mpBDyzZgVZsCQ"
+nft_marketplace = "5FNsdhUK4Qn9HLkrkpR8bi916vistHfi5kihUk8As26M"
 
 [registry]
 url = "https://api.apr.dev"
@@ -16,11 +16,16 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "cargo test"
+
+[test]
+startup_wait = 5000
+shutdown_wait = 2000
+upgradeable = false
 
 [test.validator]
-url = "https://api.mainnet-beta.solana.com"
 bind_address = "127.0.0.1"
+url = "https://api.mainnet-beta.solana.com"
 
 [[test.validator.clone]]
 address = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"

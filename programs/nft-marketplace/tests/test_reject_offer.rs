@@ -1,0 +1,33 @@
+mod utils;
+
+use solana_keypair::Keypair;
+use solana_signer::Signer;
+use utils::*;
+
+#[test]
+fn test_reject_offer() {
+    let (mut svm, payer) = setup();
+
+    let name = String::from("nameisthis");
+
+    let init_ix = initialize(&payer, &name, 500);
+    let asset = create_mpl_asset(&mut svm, &payer);
+    let collection = create_mpl_collection(&mut svm, &payer);
+
+    let price = 100_000_000;
+    let list_ix = list(&payer, &asset.pubkey(), &collection.pubkey(), price);
+    send(&mut svm, &[&payer], &[init_ix, list_ix]);
+
+
+    let taker = Keypair::new();
+    svm.airdrop(&taker.pubkey(), 100_000_000_000).unwrap();
+
+    let amount = 90_000_000;
+    let maker_offer_ix = make_offer(&taker, &asset.pubkey(), amount);
+
+    send(&mut svm, &[&taker], &[maker_offer_ix]);
+
+    let reject_offer_ix = reject_offer(&payer, &taker.pubkey(), &asset.pubkey());
+    send(&mut svm, &[&payer], &[reject_offer_ix]);
+    
+}

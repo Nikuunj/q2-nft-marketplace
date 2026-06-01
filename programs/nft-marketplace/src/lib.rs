@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs, deprecated, ambiguous_glob_reexports)]
+
 use anchor_lang::prelude::*;
 
 pub mod error;
@@ -8,7 +10,7 @@ pub use error::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("BY1bqJ3LAi54jWk6xo5WF5Nxc6tXf75mpBDyzZgVZsCQ");
+declare_id!("5FNsdhUK4Qn9HLkrkpR8bi916vistHfi5kihUk8As26M");
 
 #[program]
 pub mod nft_marketplace {
@@ -47,5 +49,9 @@ pub mod nft_marketplace {
 
     pub fn withdraw_fee(ctx: Context<WithdrawFee>, amount: u64) -> Result<()> {
         ctx.accounts.withdraw_fee(amount)
+    }
+
+    pub fn reject_offer(ctx: Context<RejectOffer>) -> Result<()> {
+        ctx.accounts.reject_offer()
     }
 }
