@@ -113,7 +113,7 @@ impl<'info> AcceptOffer<'info> {
             CpiContext::new_with_signer(
                 self.system_program.to_account_info(),
                 Transfer {
-                    from: self.offer_maker.to_account_info(),
+                    from: self.offer_vault.to_account_info(),
                     to: self.maker.to_account_info(),
                 },
                 signers_seeds,
@@ -124,7 +124,7 @@ impl<'info> AcceptOffer<'info> {
             CpiContext::new_with_signer(
                 self.system_program.to_account_info(),
                 Transfer {
-                    from: self.offer_maker.to_account_info(),
+                    from: self.offer_vault.to_account_info(),
                     to: self.treasury.to_account_info(),
                 },
                 signers_seeds,

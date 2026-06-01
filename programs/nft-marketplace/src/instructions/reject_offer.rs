@@ -3,15 +3,16 @@ use anchor_lang::{
     system_program::{transfer, Transfer},
 };
 
-use crate::state::Offer;
+use crate::state::{Listing, Offer};
 
 #[derive(Accounts)]
-pub struct CloseOffer<'info> {
+pub struct RejectOffer<'info> {
     #[account(mut)]
-    pub offer_maker: Signer<'info>,
+    pub maker: Signer<'info>,
+
     /// CHECK:
     #[account(mut)]
-    pub maker: UncheckedAccount<'info>,
+    pub offer_maker: UncheckedAccount<'info>,
 
     #[account(
         mut,
@@ -19,6 +20,7 @@ pub struct CloseOffer<'info> {
         seeds = [b"offer", offer.listing.as_ref(), offer.offer_maker.as_ref()],
         bump = offer.bump,
         has_one = offer_maker,
+        has_one = listing,
     )]
     pub offer: Account<'info, Offer>,
 
@@ -29,12 +31,18 @@ pub struct CloseOffer<'info> {
     )]
     pub offer_vault: SystemAccount<'info>,
 
-
+    #[account(
+        mut,
+        seeds = [b"listing", listing.asset.as_ref()],
+        bump = listing.bump,
+        has_one = maker,
+    )]
+    pub listing: Account<'info, Listing>,
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> CloseOffer<'info> {
-    pub fn close_offer(&mut self) -> Result<()> {
+impl<'info> RejectOffer<'info> {
+    pub fn reject_offer(&mut self) -> Result<()> {
         let offer_key = self.offer.key();
         let signers_seeds: &[&[&[u8]]] =
             &[&[b"offer_vault", offer_key.as_ref(), &[self.offer.vault_bump]]];
