@@ -16,7 +16,7 @@ pub struct RejectOffer<'info> {
 
     #[account(
         mut,
-        close = offer_maker,
+        close = maker,
         seeds = [b"offer", offer.listing.as_ref(), offer.offer_maker.as_ref()],
         bump = offer.bump,
         has_one = offer_maker,
