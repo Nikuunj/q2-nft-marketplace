@@ -38,7 +38,6 @@ impl<'info> List<'info> {
             maker: self.maker.key(),
             asset: self.asset.key(),
             price,
-            solded: false,
             bump: bumps.listing
         });
 

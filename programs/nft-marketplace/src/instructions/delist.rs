@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use mpl_core::{instructions::TransferV1CpiBuilder, ID as MPL_CORE_ID};
 
-use crate::{state::{Listing, MarketPlace}, error::ErrorCode};
+use crate::state::{Listing, MarketPlace};
 
 #[derive(Accounts)]
 pub struct Delist<'info> {
@@ -28,7 +28,6 @@ pub struct Delist<'info> {
         bump = listing.bump,
         has_one = maker,
         has_one = asset,
-        constraint = !listing.solded @ ErrorCode::AlreadySold
     )]
     pub listing: Account<'info, Listing>,
     /// CHECK: Is this mpl core program validate during cpi transfer by mpl-core

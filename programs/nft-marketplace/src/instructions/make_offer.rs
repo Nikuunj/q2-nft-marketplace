@@ -1,5 +1,8 @@
 // make offecr give counter offer
-use anchor_lang::prelude::*;
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 
 use crate::state::{Listing, Offer};
 
@@ -16,6 +19,13 @@ pub struct MakeOffer<'info> {
         bump
     )]
     pub offer: Account<'info, Offer>,
+
+    #[account(
+        mut,
+        seeds = [b"offer_vault", offer.key().as_ref()],
+        bump
+    )]
+    pub offer_vault: SystemAccount<'info>,
     #[account(
         mut,
         seeds = [b"listing", listing.asset.as_ref()],
@@ -28,12 +38,24 @@ pub struct MakeOffer<'info> {
 
 impl<'info> MakeOffer<'info> {
     pub fn make_offer(&mut self, price: u64, bumps: MakeOfferBumps) -> Result<()> {
+        
+        transfer(
+            CpiContext::new(
+                self.system_program.to_account_info(),
+                Transfer {
+                    from: self.maker.to_account_info(),
+                    to: self.offer_vault.to_account_info(),
+                },
+            ),
+            price,
+        )?;
+
         self.offer.set_inner(Offer {
             listing: self.listing.key(),
             offer_maker: self.maker.key(),
             price,
-            accepted: false,
             bump: bumps.offer,
+            vault_bump: bumps.offer_vault,
         });
         Ok(())
     }
