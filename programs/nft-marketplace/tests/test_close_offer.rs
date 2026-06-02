@@ -5,7 +5,7 @@ use solana_signer::Signer;
 use utils::*;
 
 #[test]
-fn test_reject_offer() {
+fn test_close_offer() {
     let (mut svm, payer) = setup();
 
     let name = String::from("nameisthis");
@@ -27,7 +27,7 @@ fn test_reject_offer() {
 
     send(&mut svm, &[&taker], &[maker_offer_ix]);
 
-    let reject_offer_ix = reject_offer(&payer, &taker.pubkey(), &asset.pubkey());
-    send(&mut svm, &[&payer], &[reject_offer_ix]);
+    let close_offer_ix = close_offer(&taker, &payer.pubkey(), &asset.pubkey());
+    send(&mut svm, &[&taker], &[close_offer_ix]);
     
 }

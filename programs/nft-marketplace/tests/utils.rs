@@ -112,11 +112,12 @@ pub fn create_mpl_collection(svm: &mut LiteSVM, payer: &Keypair) -> Keypair {
     collection
 }
 
-pub fn create_mpl_asset(svm: &mut LiteSVM, owner: &Keypair) -> Keypair {
+pub fn create_mpl_asset(svm: &mut LiteSVM, owner: &Keypair, collection: &Pubkey) -> Keypair {
     let asset = Keypair::new();
     let ix = CreateV1Builder::new()
         .asset(asset.pubkey())
         .payer(owner.pubkey())
+        .collection(Some(*collection))
         .name("assetname".to_string())
         .uri("asseturi".to_string())
         .instruction();
@@ -161,7 +162,7 @@ pub fn list(maker: &Keypair, asset: &Pubkey, collection: &Pubkey, price: u64) ->
         accounts: nft_marketplace::accounts::List {
             maker: maker_pub,
             asset: *asset,
-            collection: None,
+            collection: Some(*collection),
             listing,
             mpl_core_program: MPL_CORE_ID,
             system_program: SYSTEM_PROGRAM_ID,
@@ -194,7 +195,7 @@ pub fn buy(
             taker: taker.pubkey(),
             maker: *maker,
             asset: *asset,
-            collection: None,
+            collection: Some(*collection),
             maketplace: marketplace_pda,
             listing,
             reward_mint: reward_mint_pda,
@@ -254,5 +255,31 @@ pub fn reject_offer(
         }
         .to_account_metas(None),
         data: nft_marketplace::instruction::RejectOffer {}.data(),
+    }
+}
+
+
+pub fn close_offer(
+    offer_maker: &Keypair,
+    maker: &Pubkey,
+    asset: &Pubkey,
+) -> Instruction {
+    let listing = get_listing_pda(asset);
+
+    let offer = get_offer_pda(&offer_maker.pubkey(), &listing);
+
+    let (offer_vault, _) = get_vault_pda(&offer);
+
+    Instruction {
+        program_id: nft_marketplace::id(),
+        accounts: nft_marketplace::accounts::CloseOffer {
+            maker: *maker,
+            offer_maker: offer_maker.pubkey(),
+            offer,
+            offer_vault,
+            system_program: SYSTEM_PROGRAM_ID,
+        }
+        .to_account_metas(None),
+        data: nft_marketplace::instruction::CloseOffer {}.data(),
     }
 }
